@@ -6,6 +6,7 @@
 */
 const AssetCleaner = require('./AssetCleaner');
 const AssetSize = require('./AssetSize');
+const AssetMinifyImage = require('./AssetMinifyImage');
 
 let command = process.argv[2];
 let sourceFile = process.argv[3];
@@ -33,12 +34,16 @@ let parseCommand = function(cmd) {
         case '-size':
             AssetSize.start(sourceFile, destFile);
             break;
+        case '-min':
+            AssetMinifyImage.start(sourceFile, destFile);
+            break;
         default:
             let strHelp = Version + '\n' + 
                         'Usage: node main.js <command>\n'+
                         'Examples:\n' +
                         '  node main.js -clean d:/myproject/assets d:/out.txt\n' +
-                        '  node main.js -size d:/myproject/assets d:/out.txt';
+                        '  node main.js -size d:/myproject/assets d:/out.txt\n' +
+                        '  node main.js -min d:/myproject/assets d:/backup';
             console.log(strHelp);
             break;
     }
