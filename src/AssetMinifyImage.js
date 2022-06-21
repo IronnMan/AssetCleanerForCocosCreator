@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const FileHelper = require('./FileHelper');
 const compressImages = require('compress-images');
+const { compress } = require('compress-images/promise');
 
 // 查找所有图片类型
 let AssetMinifyImage = {
@@ -16,16 +17,17 @@ let AssetMinifyImage = {
     sourceFile = FileHelper.getFullPath(sourceFile);
     destFile = FileHelper.getFullPath(destFile);
     
+    
     // 执行压缩
-    this.minify(sourceFile, destFile);
+    this.minify(sourceFile, destFile).finally(() => {
+      // 拷贝
+      this.copy(sourceFile, destFile);
+    });
 
-    // TODO 判断 this.minify() 是否执行完成，如果完成则执行 this.copy()
-    // 拷贝
-    //this.copy(sourceFile, destFile);
   },
 
   // 拷贝文件，如果已存在的文件则跳过
-  copy(srcDir, resultDir) {
+  copy: function(srcDir, resultDir) {
 
     // 源目录不能为空
     if (!fs.existsSync(srcDir)) {
@@ -69,23 +71,38 @@ let AssetMinifyImage = {
   },
 
   // 压缩图片
-  minify(inputPath, outputPath) {
+  minify: async (inputPath, outputPath) => {
 
     inputPath += '/**/*.{jpg,JPG,jpeg,JPEG,png,svg,gif}';
     outputPath += '/';
-    compressImages(inputPath, outputPath, { compress_force: false, statistic: true, autoupdate: true }, false,
-      { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
-      { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
-      { svg: { engine: "svgo", command: "--multipass" } },
-      { gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] } },
-      function (error, completed, statistic) {
-        console.log("-------------");
-        console.log(error);
-        console.log(completed);
-        console.log(statistic);
-        console.log("-------------");
+    // compressImages(inputPath, outputPath, { compress_force: false, statistic: true, autoupdate: true }, false,
+    //   { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
+    //   { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
+    //   { svg: { engine: "svgo", command: "--multipass" } },
+    //   { gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] } },
+    //   function (error, completed, statistic) {
+    //     console.log("-------------");
+    //     console.log(error);
+    //     console.log(completed);
+    //     console.log(statistic);
+    //     console.log("-------------");
+    //   }
+    // );
+
+    // callback();
+
+    const result = await compress({
+      source: inputPath,
+      destination: outputPath,
+      enginesSetup: {
+        jpg: { engine: "mozjpeg", command: ["-quality", "60"] },
+        png: { engine: "pngquant", command: ["--quality=20-50", "-o"] },
+        svg: { engine: "svgo", command: "--multipass" },
+        gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] }
       }
-    );
+    });
+
+    const { statistic, errors } = result;
   }
 
 };
