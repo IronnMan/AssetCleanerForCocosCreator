@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const FileHelper = require('./FileHelper');
-const compressImages = require('compress-images');
 const { compress } = require('compress-images/promise');
 
 // 查找所有图片类型
@@ -75,21 +74,6 @@ let AssetMinifyImage = {
 
     inputPath += '/**/*.{jpg,JPG,jpeg,JPEG,png,svg,gif}';
     outputPath += '/';
-    // compressImages(inputPath, outputPath, { compress_force: false, statistic: true, autoupdate: true }, false,
-    //   { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
-    //   { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
-    //   { svg: { engine: "svgo", command: "--multipass" } },
-    //   { gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] } },
-    //   function (error, completed, statistic) {
-    //     console.log("-------------");
-    //     console.log(error);
-    //     console.log(completed);
-    //     console.log(statistic);
-    //     console.log("-------------");
-    //   }
-    // );
-
-    // callback();
 
     const result = await compress({
       source: inputPath,
